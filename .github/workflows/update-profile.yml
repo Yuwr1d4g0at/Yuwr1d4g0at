@@ -8,15 +8,25 @@ on:
     branches: [main]
     paths:
       - profile.json
+      - data/**
       - scripts/**
       - fonts/**
       - .github/workflows/update-profile.yml
+  issues:
+    types: [opened, edited, closed, reopened, deleted, labeled, unlabeled]
 
 permissions:
   contents: write
+  issues: write
+
+concurrency:
+  group: update-profile
+  cancel-in-progress: false
 
 jobs:
   build:
+    # Issue events only matter for guestbook signatures.
+    if: github.event_name != 'issues' || startsWith(github.event.issue.title, '[GUESTBOOK]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,9 +36,13 @@ jobs:
       - run: node scripts/build.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          THANK_GUESTBOOK: "true"
       - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add assets README.md
-          git diff --cached --quiet || (git commit -m "Update pixel profile stats" && git push)
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Update pixel profile"
+          git pull --rebase origin main
+          git push

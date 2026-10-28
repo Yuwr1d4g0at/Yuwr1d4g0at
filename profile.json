@@ -3,6 +3,7 @@
   "displayName": "YUWR1D4G04T",
   "class": "IT HELPER",
   "alignment": "CHAOTIC NICE :3",
+  "season": "auto",
   "bio": [
     "fixes computers for fun",
     "builds websites for the cause",
@@ -10,15 +11,38 @@
     "we out here being nice :3"
   ],
   "inventory": [
-    { "label": "HTML", "color": "#ef7d57" },
-    { "label": "CSS", "color": "#41a6f6" },
-    { "label": "JS", "color": "#ffcd75" },
-    { "label": "GIT", "color": "#b13e53" },
-    { "label": "WIN", "color": "#3b5dc9" },
-    { "label": "LINUX", "color": "#a7f070" }
+    {
+      "label": "HTML",
+      "color": "#ef7d57"
+    },
+    {
+      "label": "CSS",
+      "color": "#41a6f6"
+    },
+    {
+      "label": "JS",
+      "color": "#ffcd75"
+    },
+    {
+      "label": "GIT",
+      "color": "#b13e53"
+    },
+    {
+      "label": "WIN",
+      "color": "#3b5dc9"
+    },
+    {
+      "label": "LINUX",
+      "color": "#a7f070"
+    }
   ],
-  "hiddenRepos": ["Yuwr1d4g0at"],
+  "hiddenRepos": [
+    "Yuwr1d4g0at"
+  ],
   "maxQuests": 4,
+  "website": "",
+  "websiteRepo": "IT-Help-website",
+  "guestbookRows": 5,
   "fallbackQuests": [
     {
       "name": "IT-Help-website",

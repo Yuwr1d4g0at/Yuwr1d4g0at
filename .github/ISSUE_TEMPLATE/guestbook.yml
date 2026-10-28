@@ -1,0 +1,17 @@
+name: Sign the guestbook
+description: Leave a message on Yuwr1d4g0at's profile.
+title: "[GUESTBOOK] "
+labels: ["guestbook"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for stopping by! Your GitHub username and message will show on the profile's guestbook board.
+        Keep it nice :3 (the first 42 characters show up on the board).
+  - type: input
+    id: message
+    attributes:
+      label: Message
+      placeholder: hi from a fellow goat enjoyer
+    validations:
+      required: true
