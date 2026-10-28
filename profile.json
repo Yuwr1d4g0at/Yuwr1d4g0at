@@ -1,0 +1,31 @@
+{
+  "username": "Yuwr1d4g0at",
+  "displayName": "YUWR1D4G04T",
+  "class": "IT HELPER",
+  "alignment": "CHAOTIC NICE :3",
+  "bio": [
+    "fixes computers for fun",
+    "builds websites for the cause",
+    "always down to help",
+    "we out here being nice :3"
+  ],
+  "inventory": [
+    { "label": "HTML", "color": "#ef7d57" },
+    { "label": "CSS", "color": "#41a6f6" },
+    { "label": "JS", "color": "#ffcd75" },
+    { "label": "GIT", "color": "#b13e53" },
+    { "label": "WIN", "color": "#3b5dc9" },
+    { "label": "LINUX", "color": "#a7f070" }
+  ],
+  "hiddenRepos": ["Yuwr1d4g0at"],
+  "maxQuests": 4,
+  "fallbackQuests": [
+    {
+      "name": "IT-Help-website",
+      "description": "Website for the it helping hobby",
+      "language": "HTML",
+      "languageColor": "#e34c26",
+      "url": "https://github.com/Yuwr1d4g0at/IT-Help-website"
+    }
+  ]
+}
