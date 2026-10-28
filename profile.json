@@ -4,6 +4,8 @@
   "class": "IT HELPER",
   "alignment": "CHAOTIC NICE :3",
   "season": "auto",
+  "encounters": true,
+  "goatBorn": "2026-10-28T18:00:00Z",
   "bio": [
     "fixes computers for fun",
     "builds websites for the cause",

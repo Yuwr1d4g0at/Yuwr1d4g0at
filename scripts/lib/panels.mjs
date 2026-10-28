@@ -18,6 +18,7 @@ import {
   BAT_DOWN,
   ICONS,
 } from './sprites.mjs';
+import { SHAPES, monsterPalette } from './monsters.mjs';
 
 const loop = (attr, values, dur, extra = '') =>
   `<animate attributeName="${attr}" values="${values}" dur="${dur}s" calcMode="discrete" repeatCount="indefinite"${extra}/>`;
@@ -71,7 +72,7 @@ function seasonScene(season, W, H) {
   }
   if (season === 'winter') {
     let ground = '';
-    for (let x = 6; x < W - 18; x += 8) ground += `<rect x="${x}" y="${H - 34 - Math.round(rand() * 2) * 4}" width="8" height="${30}" fill="${C.border}"/>`;
+    for (let x = 6; x < W - 18; x += 8) ground += `<rect x="${x}" y="${SCENE_H - 18 - Math.round(rand() * 2) * 4}" width="8" height="30" fill="${C.border}"/>`;
     return {
       back: '',
       front:
@@ -98,9 +99,39 @@ function seasonScene(season, W, H) {
   return { back: '', front: '', tagline: null };
 }
 
-export function banner({ config, level, season, accountYears }) {
+const MOOD_ICONS = {
+  happy: { rows: ['.X.X.', 'XXXXX', 'XXXXX', '.XXX.', '..X..'], color: C.pink },
+  ok: { rows: ['.....', '.....', 'X.X.X', '.....', '.....'], color: C.dim },
+  sad: { rows: ['..X..', '.XXX.', '.XXX.', 'XXXXX', '.XXX.'], color: C.blue },
+};
+
+// A speech bubble over the goat's head showing how cared-for it is.
+function moodBubble(mood, x, y) {
+  const icon = MOOD_ICONS[mood];
+  if (!icon) return '';
+  return `<g><rect x="${x}" y="${y}" width="30" height="26" fill="${C.border}"/>
+<rect x="${x + 4}" y="${y + 26}" width="6" height="4" fill="${C.border}"/><rect x="${x}" y="${y + 30}" width="4" height="4" fill="${C.border}"/>
+${sprite(icon.rows, { X: icon.color }, x + 7, y + 6, 3)}
+<animateTransform attributeName="transform" type="translate" values="0 0;0 -3" dur="1.2s" calcMode="discrete" repeatCount="indefinite"/></g>`;
+}
+
+// A game-style dialog box along the bottom of the banner.
+function encounterBox(monster, y) {
+  const x = 22;
+  const w = 820;
+  const h = 84;
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${C.border}" stroke="${C.dim}" stroke-width="4"/>
+<text x="${x + 22}" y="${y + 34}" class="h" font-size="12" fill="${C.bg}">A WILD ${esc(monster.name)} APPEARED!</text>
+<text x="${x + 22}" y="${y + 66}" class="b" font-size="24" fill="${C.slot}">${esc(monster.text)}</text>
+<g>${sprite(SHAPES[monster.shape], monsterPalette(monster), x + w - 76, y + 17, 5)}<animateTransform attributeName="transform" type="translate" values="0 0;0 -4" dur="0.6s" calcMode="discrete" repeatCount="indefinite"/></g>
+<g>${sprite(['XXXXX', '.XXX.', '..X..'], { X: C.red }, x + w - 104, y + 62, 3)}${loop('opacity', '1;0', 0.8)}</g>`;
+}
+
+const SCENE_H = 290;
+
+export function banner({ config, level, season, accountYears, mood, monster }) {
   const W = 880;
-  const H = 300;
+  const H = monster ? 400 : 300;
   const scene = seasonScene(season, W, H);
   const tagline =
     scene.tagline ?? (season === 'birthday' ? `- ${accountYears} YEARS ON GITHUB -` : '- PRESS START -');
@@ -125,6 +156,7 @@ export function banner({ config, level, season, accountYears }) {
 ${scene.back}
 ${stars}
 ${goat(36, 74, 10, level)}
+${moodBubble(mood, 196, 30)}
 <text x="830" y="80" class="h" font-size="9" fill="${C.muted}" text-anchor="end">${evo}</text>
 ${hearts}
 <text x="250" y="88" class="h" font-size="12" fill="${C.green}">PLAYER 1</text>
@@ -133,8 +165,10 @@ ${hearts}
 <text x="250" y="210" class="b" font-size="28" fill="${C.text}">ALIGNMENT: ${esc(config.alignment)}</text>
 <text x="250" y="250" class="h" font-size="10" fill="${C.muted}">${esc(tagline)}${loop('opacity', '1;0', 1.2)}</text>
 ${scene.front}
+${monster ? encounterBox(monster, SCENE_H) : ''}
 </g>`;
-  return svg(W, H, body, `Player 1: ${config.displayName}. Class: ${config.class}. Alignment: ${config.alignment}`);
+  const encounter = monster ? ` A wild ${monster.name} appeared: ${monster.text}` : '';
+  return svg(W, H, body, `Player 1: ${config.displayName}. Class: ${config.class}. Alignment: ${config.alignment}.${encounter}`);
 }
 
 // ---------------------------------------------------------------- bio + inventory
@@ -237,6 +271,10 @@ export const ACHIEVEMENTS = [
   { name: 'OLD GOAT', desc: '3 yrs on github', icon: 'horn', color: '#c98a4b', test: (d) => d.accountYears >= 3 },
   { name: 'GUEST STAR', desc: '1 guestbook sign', icon: 'scroll', color: C.pink, accent: C.bg, test: (d) => d.guestbook.length >= 1 },
   { name: 'LEVEL 10', desc: 'reach level 10', icon: 'crown', color: C.yellow, accent: C.red, test: (d) => d.stats?.level >= 10 },
+  { name: 'WELL FED', desc: 'goat fed 10x', icon: 'heart', color: C.pink, test: (d) => d.care?.fed >= 10 },
+  { name: 'BUG SQUASHER', desc: 'defeat 1 boss', icon: 'bugIcon', color: C.green, test: (d) => d.boss?.slain.length >= 1 },
+  { name: 'NIGHT OWL', desc: '10 commits 0-5am', icon: 'moon', color: C.yellow, test: (d) => d.activity?.night >= 10 },
+  { name: 'EARLY BIRD', desc: '10 commits 5-8am', icon: 'sun', color: C.orange, accent: C.yellow, test: (d) => d.activity?.early >= 10 },
 ];
 
 export function achievements(data) {
@@ -378,7 +416,7 @@ export function guestbook(entries, show) {
 ${heading('GUESTBOOK')}
 ${subheading(`${entries.length} PLAYER${entries.length === 1 ? '' : 'S'} SIGNED`)}
 ${rows}
-<text x="30" y="${H - 34}" class="b" font-size="20" fill="${C.muted}">click SIGN GUESTBOOK to join the board · new names show up within a minute or two</text>`;
+<text x="30" y="${H - 34}" class="b" font-size="20" fill="${C.muted}">click this board to sign the guestbook · new names show up within a minute or two</text>`;
   const who = latest.map((e) => `${e.login}: ${cleanText(e.message)}`).join('; ');
   return svg(W, H, body, `Guestbook, ${entries.length} signed${who ? `. Latest: ${who}` : ''}`);
 }
@@ -426,4 +464,155 @@ export function footer() {
 <rect x="${W / 2 + 140}" y="28" width="10" height="14" fill="${C.pink}">${loop('opacity', '1;0', 1)}</rect>`,
     'Thanks for playing :3'
   );
+}
+
+// ---------------------------------------------------------------- goat care + boss fight
+
+const SIDE_GAME_H = 380;
+
+function meter(x, y, value, max, segs, color) {
+  const filled = Math.round((value / max) * segs);
+  let out = `<rect x="${x - 6}" y="${y - 6}" width="${segs * 16 + 8}" height="28" fill="none" stroke="${C.dim}" stroke-width="3"/>`;
+  for (let s = 0; s < segs; s++) out += `<rect x="${x + s * 16}" y="${y}" width="12" height="16" fill="${s < filled ? color : C.slot}"/>`;
+  return out;
+}
+
+const MOOD_TEXT = { happy: 'HAPPY GOAT :3', ok: 'DOING OKAY', sad: 'SAD... FEED ME' };
+
+export function goatCare(care) {
+  const W = 430;
+  const H = SIDE_GAME_H;
+  const icon = MOOD_ICONS[care.mood];
+  const fans = care.fans.length
+    ? care.fans
+        .map(
+          (f, i) => `<text x="30" y="${292 + i * 28}" class="b" font-size="24" fill="${C.yellow}">${esc(clip(f.login, 16))}</text>
+<text x="400" y="${292 + i * 28}" class="b" font-size="22" fill="${C.muted}" text-anchor="end">${f.feeds} fed · ${f.pets} pet${f.pets === 1 ? '' : 's'}</text>`
+        )
+        .join('\n')
+    : `<text x="30" y="292" class="b" font-size="24" fill="${C.dim}">no fans yet. be the first!</text>`;
+  const body = `${panel(W, H)}
+${heading('GOAT CARE')}
+${sprite(icon.rows, { X: icon.color === C.dim ? C.muted : icon.color }, 30, 76, 4)}
+<text x="62" y="96" class="b" font-size="28" fill="${C.text}">${MOOD_TEXT[care.mood]}</text>
+<text x="30" y="148" class="b" font-size="26" fill="${C.text}">FOOD</text>
+${meter(104, 132, care.food, 100, 11, C.orange)}
+<text x="400" y="148" class="b" font-size="24" fill="${C.muted}" text-anchor="end">${care.food}</text>
+<text x="30" y="192" class="b" font-size="26" fill="${C.text}">LOVE</text>
+${meter(104, 176, care.love, 100, 11, C.pink)}
+<text x="400" y="192" class="b" font-size="24" fill="${C.muted}" text-anchor="end">${care.love}</text>
+<text x="30" y="230" class="b" font-size="22" fill="${C.muted}">fed ${care.fed}x · petted ${care.pets}x · meters drop over time</text>
+<text x="30" y="262" class="h" font-size="10" fill="${C.green}">TOP FANS</text>
+${fans}`;
+  return svg(W, H, body, `Goat care: ${MOOD_TEXT[care.mood].toLowerCase()}. Food ${care.food} of 100, love ${care.love} of 100. Fed ${care.fed} times, petted ${care.pets} times.`);
+}
+
+export function bossFight(boss) {
+  const W = 430;
+  const H = SIDE_GAME_H;
+  const hits = boss.hits.length
+    ? boss.hits
+        .map(
+          (h, i) => `<text x="30" y="${240 + i * 28}" class="b" font-size="24" fill="${C.yellow}">${esc(clip(h.login, 16))}</text>
+<text x="400" y="${240 + i * 28}" class="b" font-size="22" fill="${h.crit ? C.orange : C.muted}" text-anchor="end">-${h.dmg}${h.crit ? ' CRIT!' : ''}</text>`
+        )
+        .join('\n')
+    : `<text x="30" y="240" class="b" font-size="24" fill="${C.dim}">no hits yet. strike first!</text>`;
+  const palette = { X: boss.color, Y: boss.accent, W: C.border, K: C.bg, L: C.muted };
+  const flicker = boss.name.startsWith('HEISENBUG') ? loop('opacity', '1;0.3;1;1', 1.4) : '';
+  const body = `${panel(W, H)}
+${heading('BOSS FIGHT')}
+${subheading(`#${boss.index + 1}`, 400)}
+<g>${sprite(SHAPES.bug, palette, 30, 76, 7)}${flicker}<animateTransform attributeName="transform" type="translate" values="0 0;3 0;0 0;-3 0" dur="0.8s" calcMode="discrete" repeatCount="indefinite"/></g>
+<text x="122" y="100" class="h" font-size="11" fill="${C.text}">${esc(boss.name)}</text>
+${meter(128, 118, boss.current, boss.hp, 17, C.red)}
+<text x="122" y="168" class="b" font-size="24" fill="${C.muted}">HP ${boss.current} / ${boss.hp}</text>
+<text x="30" y="210" class="h" font-size="10" fill="${C.green}">LAST HITS</text>
+${hits}
+<text x="30" y="${H - 34}" class="b" font-size="22" fill="${C.muted}">bosses slain: ${boss.slain.length}${boss.mvp ? ` · mvp: ${esc(clip(boss.mvp, 14))}` : ''}</text>`;
+  return svg(W, H, body, `Boss fight #${boss.index + 1}: ${boss.name}, ${boss.current} of ${boss.hp} HP left. ${boss.slain.length} bosses slain.`);
+}
+
+// ---------------------------------------------------------------- coding time
+
+export function coding(waka) {
+  const W = 880;
+  const langs = waka.languages;
+  const H = 172 + Math.max(1, langs.length) * 38 + 30;
+  const segs = 24;
+  const colors = [C.green, C.blue, C.yellow, C.pink, C.orange];
+  const rows = langs.length
+    ? langs
+        .map((l, i) => {
+          const y = 176 + i * 38;
+          const filled = Math.max(1, Math.round((l.percent / 100) * segs));
+          let bar = '';
+          for (let s = 0; s < segs; s++) bar += `<rect x="${240 + s * 16}" y="${y - 18}" width="12" height="16" fill="${s < filled ? colors[i] : C.slot}"/>`;
+          return `<text x="30" y="${y}" class="b" font-size="26" fill="${C.text}">${esc(clip(l.name, 16))}</text>
+${bar}
+<text x="834" y="${y}" class="b" font-size="24" fill="${C.muted}" text-anchor="end">${esc(l.text)}</text>`;
+        })
+        .join('\n')
+    : `<text x="30" y="176" class="b" font-size="24" fill="${C.dim}">no coding tracked this week yet</text>`;
+  const extras = [waka.editors.length && `editor: ${waka.editors.join(', ')}`, waka.os.length && `os: ${waka.os.join(', ')}`]
+    .filter(Boolean)
+    .join(' · ');
+  const body = `${panel(W, H)}
+${heading('CODING TIME')}
+${subheading('LAST 7 DAYS')}
+<text x="30" y="104" class="h" font-size="20" fill="${C.pink}">${esc(waka.total.toUpperCase())}</text>
+<text x="30" y="134" class="b" font-size="22" fill="${C.muted}">daily average: ${esc(waka.dailyAverage)}</text>
+${rows}
+<text x="30" y="${H - 34}" class="b" font-size="20" fill="${C.muted}">${esc(extras || 'tracked with wakatime')}</text>`;
+  return svg(W, H, body, `Coding time in the last 7 days: ${waka.total}. ${langs.map((l) => `${l.name} ${l.text}`).join(', ')}`);
+}
+
+// ---------------------------------------------------------------- activity clock
+
+const PERIODS = [
+  { name: 'NIGHT OWL', from: 0, to: 5 },
+  { name: 'EARLY BIRD', from: 5, to: 9 },
+  { name: 'DAY WALKER', from: 9, to: 17 },
+  { name: 'EVENING HACKER', from: 17, to: 24 },
+];
+const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+function bars(values, x0, step, base, maxH, color, labels) {
+  const max = Math.max(1, ...values);
+  return values
+    .map((v, i) => {
+      const blocks = v ? Math.max(1, Math.round((v / max) * (maxH / 8))) : 0;
+      let out = `<rect x="${x0 + i * step}" y="${base + 4}" width="${step - 4}" height="4" fill="${C.slot}"/>`;
+      for (let b = 0; b < blocks; b++) out += `<rect x="${x0 + i * step}" y="${base - (b + 1) * 8}" width="${step - 4}" height="6" fill="${color}"/>`;
+      const label = labels(i);
+      if (label != null) out += `<text x="${x0 + i * step + (step - 4) / 2}" y="${base + 30}" class="b" font-size="20" fill="${C.muted}" text-anchor="middle">${label}</text>`;
+      return out;
+    })
+    .join('');
+}
+
+export function activityClock(activity) {
+  const W = 880;
+  const H = 320;
+  const base = 226;
+  let cls = 'NO DATA YET';
+  let peakText = '';
+  if (activity?.total) {
+    const sums = PERIODS.map((p) => activity.hours.slice(p.from, p.to).reduce((a, b) => a + b, 0) / (p.to - p.from));
+    cls = PERIODS[sums.indexOf(Math.max(...sums))].name;
+    const peak = activity.hours.indexOf(Math.max(...activity.hours));
+    const weekend = activity.weekdays[0] + activity.weekdays[6];
+    peakText = `peak hour ${String(peak).padStart(2, '0')}:00 · ${Math.round((weekend / activity.total) * 100)}% on weekends · `;
+  }
+  const hours = activity?.hours ?? Array(24).fill(0);
+  const weekdays = activity?.weekdays ?? Array(7).fill(0);
+  const body = `${panel(W, H)}
+${heading('ACTIVITY CLOCK')}
+${subheading(`CLASS: ${cls}`)}
+<text x="30" y="88" class="b" font-size="20" fill="${C.muted}">hour of day</text>
+${bars(hours, 30, 25, base, 120, C.blue, (i) => (i % 6 === 0 ? String(i).padStart(2, '0') : null))}
+<text x="660" y="88" class="b" font-size="20" fill="${C.muted}">day of week</text>
+${bars(weekdays, 660, 25, base, 120, C.orange, (i) => DAYS[i])}
+<text x="30" y="${H - 34}" class="b" font-size="20" fill="${C.muted}">${esc(peakText)}${activity?.total ?? 0} commits in the last year, in your own time zone</text>`;
+  return svg(W, H, body, `Activity clock: ${cls.toLowerCase()}. ${peakText}`);
 }

@@ -120,4 +120,7 @@ export const ICONS = {
   scroll: ['XXXXXXX.', 'X.....X.', 'X.YYY.X.', 'X.....X.', 'X.YYY.X.', 'X.....X.', 'XXXXXXX.', '........'],
   crown: ['X..X..X.', 'XX.X.XX.', 'XXXXXXX.', 'XXXXXXX.', 'XYXYXYX.', 'XXXXXXX.', '........', '........'],
   heart: ['.XX.XX..', 'XXXXXXX.', 'XXXXXXX.', '.XXXXX..', '..XXX...', '...X....', '........', '........'],
+  bugIcon: ['.X....X.', '..X..X..', '.XXXXXX.', 'XX.XX.XX', '.XXXXXX.', 'XXXXXXXX', '.XXXXXX.', 'X..XX..X'],
+  moon: ['..XXX...', '.XX.....', 'XX......', 'XX......', 'XX......', 'XXX...X.', '.XXXXXX.', '..XXXX..'],
+  sun: ['...X....', '.X.X.X..', '..YYY...', 'XYYYYYX.', '..YYY...', '.X.X.X..', '...X....', '........'],
 };

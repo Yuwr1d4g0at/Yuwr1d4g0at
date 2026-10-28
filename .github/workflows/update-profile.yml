@@ -25,8 +25,13 @@ concurrency:
 
 jobs:
   build:
-    # Issue events only matter for guestbook signatures.
-    if: github.event_name != 'issues' || startsWith(github.event.issue.title, '[GUESTBOOK]')
+    # Issue events only matter for guestbook signatures and button presses.
+    if: >-
+      github.event_name != 'issues' ||
+      startsWith(github.event.issue.title, '[GUESTBOOK]') ||
+      startsWith(github.event.issue.title, '[FEED]') ||
+      startsWith(github.event.issue.title, '[PET]') ||
+      startsWith(github.event.issue.title, '[ATTACK]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,7 +41,8 @@ jobs:
       - run: node scripts/build.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          THANK_GUESTBOOK: "true"
+          WAKATIME_API_KEY: ${{ secrets.WAKATIME_API_KEY }}
+          ANSWER_ISSUES: "true"
       - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
