@@ -7,7 +7,7 @@
 
 <sub>[my website](https://github.com/Yuwr1d4g0at/IT-Help-website) · [ask me for IT help](https://github.com/Yuwr1d4g0at/Yuwr1d4g0at/issues/new?template=it-help.yml) · [sign the guestbook](https://github.com/Yuwr1d4g0at/Yuwr1d4g0at/issues/new?template=guestbook.yml)</sub>
 
-<img src="assets/care.svg" width="49%" alt="Goat care: food 20, love 0"> <img src="assets/boss.svg" width="49%" alt="Boss fight: NULL POINTER, 100 of 100 HP">
+<img src="assets/care.svg" width="49%" alt="Goat care: food 19, love 0"> <img src="assets/boss.svg" width="49%" alt="Boss fight: NULL POINTER, 100 of 100 HP">
 
 <img src="assets/tip.svg" width="100%" alt="Tip of the day: Write down what you changed so you can undo it later.">
 
